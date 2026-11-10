@@ -504,4 +504,53 @@
       if (navigator.clipboard) navigator.clipboard.writeText(txt).then(done, function () {});
     });
   });
+
+  /* Image pins: map photo coordinates through object-fit: cover */
+  var pinSets = $$("[data-pins]");
+  if (pinSets.length) {
+    var placePins = function () {
+      pinSets.forEach(function (set) {
+        var box = set.parentNode, im = $("img", box);
+        if (!im) return;
+        var iw = im.naturalWidth || +im.getAttribute("width"), ih = im.naturalHeight || +im.getAttribute("height");
+        var br = box.getBoundingClientRect(), r = im.getBoundingClientRect();
+        var k = Math.max(r.width / iw, r.height / ih), dw = iw * k, dh = ih * k;
+        var ox = r.left - br.left + (r.width - dw) / 2, oy = r.top - br.top + (r.height - dh) / 2;
+        $$(".pin", set).forEach(function (p) {
+          var x = ox + parseFloat(p.dataset.x) * dw, y = oy + parseFloat(p.dataset.y) * dh;
+          var inside = x > 12 && x < br.width - 12 && y > 12 && y < br.height - 12;
+          p.style.transform = "translate(" + x.toFixed(1) + "px," + y.toFixed(1) + "px)";
+          var lab = p.lastElementChild, lw = lab ? lab.offsetWidth : 0;
+          var fitsL = x - 26 - lw > 12, fitsR = x + 26 + lw < br.width - 12;
+          var below = !fitsL && !fitsR;
+          p.classList.toggle("is-left", !below && fitsL && (p.dataset.side === "left" || !fitsR));
+          p.classList.toggle("is-below", below);
+          if (lab) lab.style.left = below ? (Math.min(Math.max(x - lw / 2, 12), br.width - 12 - lw) - x).toFixed(1) + "px" : "";
+          p.classList.toggle("is-on", inside);
+        });
+      });
+    };
+    var pinTick = false;
+    var queuePins = function () { if (!pinTick) { pinTick = true; requestAnimationFrame(function () { pinTick = false; placePins(); }); } };
+    onScroll(queuePins);
+    window.addEventListener("resize", queuePins);
+    pinSets.forEach(function (s) { var im = $("img", s.parentNode); if (im && !im.complete) im.addEventListener("load", queuePins); });
+    placePins(); setTimeout(placePins, 400); setTimeout(placePins, 1600);
+  }
+
+  /* Footer logo: play the cable animation when it scrolls into view; nav logo replays on hover */
+  var footLogo = $(".logo--onview");
+  if (footLogo && "IntersectionObserver" in window) {
+    var lio = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { footLogo.classList.add("is-in"); lio.disconnect(); } }); }, { threshold: 0.35 });
+    lio.observe(footLogo);
+  } else if (footLogo) footLogo.classList.add("is-in");
+  var navLogo = $(".brand__logo");
+  if (navLogo && !reduce) {
+    $(".brand").addEventListener("mouseenter", function () {
+      var parts = $$(".logo__draw, .logo__plug", navLogo);
+      if (parts.some(function (p) { return p.getAnimations && p.getAnimations().some(function (a) { return a.playState === "running"; }); })) return;
+      parts.forEach(function (p) { p.style.animation = "none"; p.getBBox && p.getBBox(); });
+      requestAnimationFrame(function () { parts.forEach(function (p) { p.style.animation = ""; }); });
+    });
+  }
 })();

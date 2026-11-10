@@ -204,15 +204,6 @@ body.theme-night .nav.is-scrolled::before { background: var(--night); border-bot
 .nav.is-scrolled .nav__inner { height: var(--nav-h-sm); }
 
 .brand { display: inline-flex; align-items: center; gap: .7rem; justify-self: start; }
-.brand__mark { width: 1.9rem; height: 1.9rem; flex: none; transition: transform .6s var(--ease); }
-.brand__type { display: flex; align-items: baseline; gap: .55rem; overflow: hidden; }
-.brand__word { font-size: 1.3rem; font-weight: 600; letter-spacing: -.04em; line-height: 1; }
-.brand__sub {
-  font-size: .625rem; text-transform: uppercase; letter-spacing: .08em; line-height: 1.1;
-  font-weight: 500; opacity: .75; transition: opacity .4s var(--ease), transform .5s var(--ease);
-}
-.nav.is-scrolled .brand__sub { opacity: 0; transform: translateX(-6px); }
-.nav.is-scrolled .brand__mark { transform: rotate(-90deg); }
 
 .nav__links { display: flex; gap: clamp(1.25rem, 2.2vw, 2.5rem); }
 .nav__links a {
@@ -226,7 +217,17 @@ body.theme-night .nav.is-scrolled::before { background: var(--night); border-bot
 .nav__links a:hover::after, .nav__links a[aria-current="page"]::after { transform: scaleX(1); transform-origin: left; }
 
 .nav__end { display: flex; align-items: center; justify-content: flex-end; gap: 1.5rem; }
-.nav__phone { font-size: .875rem; font-weight: 500; font-variant-numeric: tabular-nums; }
+.nav__phone { font-size: .875rem; font-weight: 500; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.nav__vanity { font-size: 1rem; font-weight: 600; letter-spacing: .01em; font-variant-numeric: normal; }
+@media (max-width: 1279px) { .nav__vanity { display: none; } }
+.contact-hero__vanity { font-size: clamp(2.4rem, 6vw, 5.5rem); letter-spacing: -.04em; line-height: 1; font-weight: 500; margin-top: .75rem; color: var(--ink, currentColor); }
+.netsec__grid { align-items: center; row-gap: 2.5rem; }
+.netsec__media { grid-column: 1 / span 5; }
+.netsec__media .media { aspect-ratio: 4 / 5; }
+.netsec__text { grid-column: 7 / span 6; display: grid; gap: 1.5rem; }
+.netsec__inc { display: grid; gap: .9rem; padding-top: 1.25rem; border-top: 1px solid var(--line-night); }
+.netsec .ticks li { color: #d6d8da; }
+@media (max-width: 899px) { .netsec__media, .netsec__text { grid-column: 1 / -1; } .netsec__media .media { aspect-ratio: 4 / 3; } }
 .nav .btn { --h: 2.6rem; padding: 0 1.15rem 0 1.25rem; font-size: .8125rem; background: var(--white); color: var(--ink); }
 .nav .btn:hover { color: var(--white); }
 body[data-nav="dark"] .nav .btn, .nav.is-scrolled .btn { background: var(--ink); color: var(--paper); }
@@ -249,7 +250,6 @@ body.theme-night .nav.is-scrolled .btn { background: var(--white); color: var(--
 }
 @media (max-width: 560px) {
   .nav .btn { display: none; }
-  .brand__sub { display: none; }
 }
 
 /* Mobile / tablet menu */
@@ -643,7 +643,7 @@ html.is-leaving .curtain__mark { opacity: 1; transition: opacity .3s .35s; }
   .timeline__panel .media, .timeline__text { grid-column: 1 / -1; }
 }
 
-.sectors { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: var(--col-gap); }
+.sectors { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: var(--col-gap); }
 .sector { display: grid; gap: .9rem; }
 .sector .media { aspect-ratio: 3 / 4; }
 .sector h3 { font-size: var(--fs-h5); letter-spacing: -.02em; }
@@ -789,7 +789,6 @@ body.theme-night ::selection { background: var(--white); color: var(--ink); }
 .chero__tag::after { content: ""; position: absolute; width: .85rem; height: 1px; background: rgba(255,255,255,.6); left: -.85rem; top: 50%; }
 @media (max-width: 899px) {
   .chero__row .lead, .chero__row .chero__ctas { grid-column: 1 / -1; justify-content: flex-start; }
-  .chero__tag:nth-of-type(n+2) { display: none; }
 }
 
 .sectorlist { border-top: 1px solid var(--line-night); }
@@ -890,7 +889,7 @@ body.theme-night ::selection { background: var(--white); color: var(--ink); }
 .slist__body .slist__copy { grid-column: 8 / span 5; display: grid; gap: 1.25rem; align-content: start; }
 .slist__item .disclose__panel { transition: grid-template-rows .8s var(--ease); }
 .slist__btn[aria-expanded="true"] + .disclose__panel { grid-template-rows: 1fr; }
-.cursor-img { position: fixed; left: 0; top: 0; width: 20rem; aspect-ratio: 4 / 3; pointer-events: none; z-index: 40; overflow: hidden; opacity: 0; transform: translate(-50%, -50%) scale(.85); transition: opacity .35s var(--ease), transform .5s var(--ease); }
+.cursor-img { position: fixed; left: 0; top: 0; width: 12rem; aspect-ratio: 4 / 3; pointer-events: none; z-index: 40; overflow: hidden; opacity: 0; transform: translate(-50%, -50%) scale(.85); transition: opacity .35s var(--ease), transform .5s var(--ease); }
 .cursor-img.is-on { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 .cursor-img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .3s; }
 .cursor-img img.is-active { opacity: 1; }
@@ -1015,3 +1014,66 @@ body.theme-night ::selection { background: var(--white); color: var(--ink); }
 .flex-between { display: flex; justify-content: space-between; align-items: end; gap: 1.5rem 2rem; flex-wrap: wrap; }
 .stack { display: grid; gap: 1.25rem; align-content: start; }
 .col-full { grid-column: 1 / -1; }
+
+/* Shopping centers & small business */
+.plaza__hero { margin-top: 0; height: clamp(20rem, 64vh, 44rem); }
+.plaza__cols { margin-top: clamp(2.5rem, 5vw, 4.5rem); row-gap: 3rem; }
+.plaza__card { grid-column: span 6; display: grid; gap: 1.5rem; align-content: start; }
+.plaza__card .media { aspect-ratio: 16 / 10; }
+.plaza__card h3 { letter-spacing: -.03em; }
+.plaza__card .ticks { display: grid; gap: .55rem; padding-top: 1rem; border-top: 1px solid var(--line-night); }
+.plaza__card .ticks li { color: #d6d8da; }
+.plaza__foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.25rem; margin-top: clamp(2.5rem, 5vw, 4rem); padding-top: 1.5rem; border-top: 1px solid var(--line-night); }
+@media (max-width: 899px) { .plaza__card { grid-column: 1 / -1; } }
+@media (min-width: 900px) { .sectors--4 { grid-template-columns: repeat(4, minmax(0,1fr)); } }
+
+/* Image pins: anchored to points in the photo by main.js */
+.pins { position: absolute; inset: 0; z-index: 2; pointer-events: none; overflow: hidden; }
+.pin { position: absolute; left: 0; top: 0; width: 0; height: 0; opacity: 0; transition: opacity .5s var(--ease); }
+.pin.is-on { opacity: 1; }
+.pin__dot { position: absolute; left: -7px; top: -7px; width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid var(--white); background: rgba(10,11,12,.45); box-shadow: 0 0 0 4px rgba(255,255,255,.14); }
+.pin__dot::after { content: ""; position: absolute; inset: 3px; border-radius: 50%; background: var(--white); }
+.pin__label { position: absolute; top: 0; left: 26px; transform: translateY(-50%); display: grid; gap: .2rem; white-space: nowrap; padding: .6rem .8rem; font-size: .75rem; letter-spacing: .04em; text-transform: uppercase; color: var(--white); background: rgba(10,11,12,.8); border: 1px solid var(--line-night); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.pin__label::before { content: ""; position: absolute; top: 50%; right: 100%; width: 12px; height: 1px; background: rgba(255,255,255,.7); }
+.pin__sub { color: var(--night-mute); }
+.pin.is-left .pin__label { left: auto; right: 26px; }
+.pin.is-left .pin__label::before { right: auto; left: 100%; }
+@media (max-width: 899px) { .pin[data-desk] { display: none; } .pin__label { font-size: .6875rem; } }
+.pin.is-below .pin__label { top: 20px; transform: none; }
+.pin.is-below .pin__label::before { display: none; }
+
+/* 877.COOPER.9 vanity number, shown at display size */
+.cta__phone .cta__vanity { font-variant-numeric: normal; background: none; padding-bottom: 0; font-size: clamp(2.2rem, 4.6vw, 5rem); letter-spacing: -.035em; line-height: 1.05; font-weight: 500; width: fit-content; color: rgba(255,255,255,.82); margin-top: .35rem; }
+.cta__phone .cta__vanity:hover { color: #fff; }
+.menu__vanity { font-size: clamp(1.4rem, 5vw, 2rem); letter-spacing: -.03em; font-weight: 500; color: rgba(255,255,255,.8); margin-top: -.5rem; }
+.footer .footer__vanity, .footer__col .footer__vanity { font-size: 1.5rem; font-weight: 500; letter-spacing: -.02em; }
+.cinfo__vanity { font-size: 1.35rem; font-weight: 600; letter-spacing: -.01em; }
+.cta__vanity, .menu__vanity, .footer__vanity, .cinfo__vanity, .contact-hero__vanity { font-variant-numeric: normal; }
+
+/* ---------- Logo (traced client artwork, tools/logo.py) ---------- */
+.logo { display: block; overflow: visible; --lb: #104C9C; --lg: #22A45E; }
+.logo__blue { fill: var(--lb); transition: fill .45s var(--ease); }
+.logo__cable, .logo__plug, .logo__tag { fill: var(--lg); }
+.brand__logo { height: 3.3rem; width: auto; transition: height .5s var(--ease); }
+.nav.is-scrolled .brand__logo { height: 2.7rem; }
+@media (max-width: 560px) { .brand__logo, .nav.is-scrolled .brand__logo { height: 2.6rem; } }
+/* White type wherever the nav sits over a dark photo or a dark bar */
+body:not([data-nav="dark"]) .nav:not(.is-scrolled) .logo, body.theme-night .nav.is-scrolled .logo, .menu-open .nav .logo { --lb: #fff; }
+.curtain__logo { position: absolute; left: 50%; top: 50%; width: min(64vw, 30rem); transform: translate(-50%, -50%); --lb: #fff; opacity: 0; }
+html.is-entering .curtain__logo { opacity: 1; }
+html.is-entered .curtain__logo { opacity: 0; transition: opacity .3s; }
+html.is-leaving .curtain__logo { opacity: 1; transition: opacity .3s .35s; }
+.footer__logo { width: 100%; height: auto; --lb: #fff; margin-block: clamp(1rem, 3vw, 2.5rem) clamp(1.5rem, 4vw, 3rem); }
+
+/* The green cable draws itself, then the two plug segments slide in and seat */
+.logo--anim .logo__draw { stroke-dasharray: 1 1; stroke-dashoffset: 1; animation: cable-draw 1.5s cubic-bezier(.65, 0, .35, 1) .35s forwards; }
+.logo--anim .logo__plug { transform-box: fill-box; opacity: 0; transform: translateX(160%); animation: plug-seat .55s cubic-bezier(.2, .9, .25, 1.25) forwards; }
+.logo--anim .logo__plug--1 { animation-delay: 1.62s; }
+.logo--anim .logo__plug--2 { animation-delay: 1.8s; }
+.logo--onview:not(.is-in) .logo__draw, .logo--onview:not(.is-in) .logo__plug { animation-play-state: paused; }
+@keyframes cable-draw { to { stroke-dashoffset: 0; } }
+@keyframes plug-seat { 0% { opacity: 0; transform: translateX(160%); } 35% { opacity: 1; } 100% { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .logo--anim .logo__draw { animation: none; stroke-dashoffset: 0; }
+  .logo--anim .logo__plug { animation: none; opacity: 1; transform: none; }
+}
