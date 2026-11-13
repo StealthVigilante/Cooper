@@ -1,0 +1,35 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // Set this to the EXISTING Worker name before deploying.
+  "name": "cooper-technology-group",
+  "main": "worker/index.mjs",
+  "compatibility_date": "2026-11-13",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "html_handling": "none",
+    "not_found_handling": "404-page",
+    "run_worker_first": ["/api/*"]
+  },
+  "ratelimits": [
+    {
+      "name": "CONTACT_RATE_LIMITER",
+      "namespace_id": "470901",
+      "simple": { "limit": 5, "period": 60 }
+    },
+    {
+      "name": "CONTACT_SEND_LIMITER",
+      "namespace_id": "470902",
+      "simple": { "limit": 20, "period": 60 }
+    }
+  ],
+  "vars": {
+    "CONTACT_ENABLED": "false",
+    "ALLOWED_ORIGINS": "https://cooper.enhanzsolutions.com,https://replace-with-final-domain.example",
+    "CONTACT_FROM": "Cooper Website <projects@replace-with-sending-domain.example>",
+    "CONTACT_TO": "replace-with-receiving-inbox@example.com",
+    "TURNSTILE_SITE_KEY": "REPLACE_WITH_PUBLIC_SITE_KEY"
+  },
+  // Do not log request bodies, email addresses, tokens, or provider responses.
+  "observability": { "enabled": false }
+}

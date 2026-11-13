@@ -1,0 +1,18 @@
+{
+  "name": "cooper-technology-group",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "node --test --test-isolation=none tests/*.test.mjs",
+    "test:browser": "playwright test",
+    "dev": "npm run build && wrangler dev",
+    "check": "npm test && npm run build && wrangler deploy --dry-run --outdir /tmp/cooper-worker-check",
+    "deploy": "npm run build && wrangler deploy"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.65.0",
+    "wrangler": "4.161.0"
+  },
+  "engines": { "node": ">=22.8.0" }
+}

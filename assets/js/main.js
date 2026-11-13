@@ -53,32 +53,37 @@
     body.classList.add("is-loaded");
     if (doc.classList.contains("is-entering")) {
       requestAnimationFrame(function () {
-        doc.classList.add("is-entered");
-        doc.classList.remove("is-entering");
-        setTimeout(function () { doc.classList.remove("is-entered"); }, 1100);
+        // Paint the covered state before starting the incoming curtain motion.
+        requestAnimationFrame(function () {
+          doc.classList.add("is-entered");
+          doc.classList.remove("is-entering");
+          setTimeout(function () { doc.classList.remove("is-entered"); }, 1100);
+        });
       });
     }
   }
-  var fontsReady = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
-  Promise.race([fontsReady, new Promise(function (r) { setTimeout(r, 900); })]).then(revealPage);
+  revealPage();
   store.del("ctg-transition");
 
   $$("a[href]").forEach(function (a) {
     var href = a.getAttribute("href");
     if (!href || href.charAt(0) === "#" || /^(mailto|tel|sms|https?):/i.test(href) || a.target === "_blank" || a.hasAttribute("download")) return;
-    if (!/\.html(#.*)?$/.test(href)) return;
+    if (href !== "/" && !/\.html(#.*)?$/.test(href)) return;
     a.addEventListener("click", function (e) {
       if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
       if (reduce) return;
       e.preventDefault();
       store.set("ctg-transition", "1");
       doc.classList.add("is-leaving");
-      body.classList.remove("menu-open");
+      if (body.classList.contains("menu-open")) setMenu(false);
       setTimeout(function () { window.location.href = href; }, 620);
     });
   });
   window.addEventListener("pageshow", function (e) {
-    if (e.persisted) { doc.classList.remove("is-leaving", "is-entering"); }
+    if (e.persisted) {
+      doc.classList.remove("is-leaving", "is-entering");
+      if (toggle && menu) setMenu(false);
+    }
   });
 
   /* ------------------------------------------------------------------
@@ -104,16 +109,30 @@
   var menu = $("#menu");
   function setMenu(open) {
     body.classList.toggle("menu-open", open);
+    $$("main, footer").forEach(function (element) { element.inert = open; });
     toggle.setAttribute("aria-expanded", String(open));
     toggle.querySelector("span").textContent = open ? "Close" : "Menu";
     menu.setAttribute("aria-hidden", String(!open));
-    if (open) { menu.removeAttribute("inert"); nav.classList.remove("is-hidden"); if (lenis) lenis.stop(); else body.style.overflow = "hidden"; var f = $("a", menu); if (f) setTimeout(function () { f.focus(); }, 300); }
+    if (open) { menu.removeAttribute("inert"); nav.classList.remove("is-hidden"); if (lenis) lenis.stop(); else body.style.overflow = "hidden"; var f = $("a", menu); if (f) f.focus({ preventScroll: true }); }
     else { menu.setAttribute("inert", ""); if (lenis) lenis.start(); else body.style.overflow = ""; }
   }
   if (toggle && menu) {
     menu.setAttribute("inert", "");
     toggle.addEventListener("click", function () { setMenu(!body.classList.contains("menu-open")); });
-    document.addEventListener("keydown", function (e) { if (e.key === "Escape" && body.classList.contains("menu-open")) { setMenu(false); toggle.focus(); } });
+    window.matchMedia("(min-width: 1100px)").addEventListener("change", function (event) {
+      if (event.matches && body.classList.contains("menu-open")) setMenu(false);
+    });
+    document.addEventListener("keydown", function (e) {
+      if (!body.classList.contains("menu-open")) return;
+      if (e.key === "Escape") { setMenu(false); toggle.focus(); }
+      if (e.key === "Tab") {
+        var stops = [toggle].concat($$('a[href], button:not(:disabled)', menu));
+        var current = stops.indexOf(document.activeElement);
+        if (current === -1 || (!e.shiftKey && current === stops.length - 1) || (e.shiftKey && current === 0)) {
+          e.preventDefault(); stops[e.shiftKey ? stops.length - 1 : 0].focus();
+        }
+      }
+    });
   }
 
   /* ------------------------------------------------------------------
@@ -444,57 +463,6 @@
     });
   }
 
-  /* ------------------------------------------------------------------
-     Contact form
-     ------------------------------------------------------------------ */
-  var form = $("#project-form");
-  if (form) {
-    var status = $("#form-status");
-    var validate = function (field) {
-      var input = $("input, select, textarea", field);
-      if (!input || !input.hasAttribute("required")) return true;
-      var ok = input.checkValidity();
-      field.classList.toggle("is-invalid", !ok);
-      var err = $(".err", field);
-      if (err) err.textContent = ok ? "" : (input.getAttribute("data-err") || "Please complete this field.");
-      input.setAttribute("aria-invalid", String(!ok));
-      return ok;
-    };
-    $$(".field", form).forEach(function (f) {
-      var input = $("input, select, textarea", f);
-      if (input) input.addEventListener("blur", function () { if (input.value) validate(f); });
-    });
-    form.addEventListener("submit", function (e) {
-      e.preventDefault();
-      var fields = $$(".field", form), first = null;
-      fields.forEach(function (f) { if (!validate(f) && !first) first = f; });
-      if (first) { $("input, select, textarea", first).focus(); return; }
-      var endpoint = form.getAttribute("data-endpoint");
-      var name = (form.elements.name.value || "").split(" ")[0];
-      var show = function (title, text) {
-        status.hidden = false;
-        $("strong", status).textContent = title;
-        $("p", status).textContent = text;
-        status.focus();
-      };
-      if (!endpoint) {
-        show("Thanks" + (name ? ", " + name : "") + ". One more step.",
-          "Online submissions are switched off on this preview. Call (877) 266-7379 and mention your project; we will take it from there.");
-        return;
-      }
-      var btn = $('button[type="submit"]', form);
-      btn.disabled = true;
-      fetch(endpoint, { method: "POST", body: new FormData(form), headers: { Accept: "application/json" } })
-        .then(function (r) {
-          if (!r.ok) throw new Error();
-          form.reset();
-          show("Thanks" + (name ? ", " + name : "") + ". Your request is with our team.", "We will be in touch to arrange a call or site visit. For anything urgent, call (877) 266-7379.");
-        })
-        .catch(function () { show("That did not go through.", "Please try again, or call us on (877) 266-7379."); })
-        .then(function () { btn.disabled = false; });
-    });
-  }
-
   /* Copy phone number */
   $$("[data-copy]").forEach(function (b) {
     b.addEventListener("click", function () {
@@ -537,6 +505,8 @@
     pinSets.forEach(function (s) { var im = $("img", s.parentNode); if (im && !im.complete) im.addEventListener("load", queuePins); });
     placePins(); setTimeout(placePins, 400); setTimeout(placePins, 1600);
   }
+
+  window.ctgReady = true;
 
   /* Footer logo: play the cable animation when it scrolls into view; nav logo replays on hover */
   var footLogo = $(".logo--onview");

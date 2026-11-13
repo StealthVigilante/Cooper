@@ -287,8 +287,9 @@ body.theme-night .nav.is-scrolled .btn { background: var(--white); color: var(--
 /* ---------- Page curtain transition ---------- */
 .curtain {
   position: fixed; inset: 0; z-index: 150; background: var(--ink);
-  pointer-events: none; transform: translateY(100%);
+  pointer-events: none; transform: translateY(100%); visibility: hidden;
 }
+html.is-entering .curtain, html.is-entered .curtain, html.is-leaving .curtain { visibility: visible; }
 .curtain__mark {
   position: absolute; left: 50%; top: 50%; width: 2.5rem; height: 2.5rem;
   margin: -1.25rem 0 0 -1.25rem; color: var(--white); opacity: 0;
@@ -1076,4 +1077,31 @@ html.is-leaving .curtain__logo { opacity: 1; transition: opacity .3s .35s; }
 @media (prefers-reduced-motion: reduce) {
   .logo--anim .logo__draw { animation: none; stroke-dashoffset: 0; }
   .logo--anim .logo__plug { animation: none; opacity: 1; transform: none; }
+}
+
+/* Form safety and concise legal pages */
+.form-trap { position:absolute; left:-10000px; width:1px; height:1px; overflow:hidden; }
+.form__status[hidden] { display:none; }
+button:disabled { cursor:not-allowed; opacity:.6; }
+.legal { padding-top:calc(var(--nav-h) + 3rem); }
+.legal .wrap { max-width:56rem; }
+.legal h1 { margin:1rem 0 2rem; }
+.legal h2 { font-size:1.5rem; margin:2rem 0 .75rem; }
+.legal p { margin:.75rem 0; }
+.legal a { text-decoration:underline; text-underline-offset:.15em; }
+.footer__licenses { padding-bottom:1.5rem; }
+
+/* Mobile and tablet only: keep hero type legible over busy photos (desktop is unchanged) */
+@media (max-width: 899px) {
+  .hero__bg img { object-position: 62% 50%; }
+  .hero__bg::after, .rhero::after {
+    background:
+      linear-gradient(180deg, rgba(10,11,12,.62) 0%, rgba(10,11,12,.18) 22%, rgba(10,11,12,.18) 34%),
+      linear-gradient(0deg, rgba(10,11,12,.94) 0%, rgba(10,11,12,.86) 38%, rgba(10,11,12,.55) 60%, rgba(10,11,12,.12) 80%);
+  }
+  .hero__title, .rhero h1 { text-shadow: 0 2px 24px rgba(0,0,0,.35); }
+  .hero__copy, .rhero__row .lead { color: rgba(255,255,255,.92); text-shadow: 0 1px 12px rgba(0,0,0,.4); }
+  .hero__top .label, .rhero .label { text-shadow: 0 1px 8px rgba(0,0,0,.5); }
+  .rhero__nav .chip, .rhero__nav a { background: rgba(10,11,12,.45); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+  .rhero__nav .chip:hover { background: var(--white); }
 }

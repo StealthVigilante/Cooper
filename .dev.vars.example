@@ -1,0 +1,10 @@
+# Copy this file to .dev.vars for LOCAL testing. Never commit the real file.
+RESEND_API_KEY=replace-with-a-sending-only-key
+TURNSTILE_SECRET_KEY=replace-with-your-turnstile-secret
+# Override vars locally as needed. Production values belong in wrangler.jsonc
+# or Cloudflare's Variables and Secrets dashboard.
+CONTACT_ENABLED=false
+CONTACT_FROM=Cooper Website <projects@notify.example.com>
+CONTACT_TO=owner@example.com
+ALLOWED_ORIGINS=http://localhost:8787,http://127.0.0.1:8787
+TURNSTILE_SITE_KEY=replace-with-your-public-site-key
