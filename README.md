@@ -10,11 +10,11 @@ Static HTML/CSS/JavaScript with a Cloudflare Worker for the project inquiry form
 | --- | --- | --- |
 | Final website domain | `site.config.json` → `productionOrigin` | `https://replace-with-final-domain.example` |
 | Search indexing | `site.config.json` → `productionReady` | Keep `false` while on the temporary domain; set `true` only for launch |
-| Existing Cloudflare Worker name | `wrangler.jsonc` → `name` | Replace `cooper-technology-group` with the actual existing Worker name before deployment |
-| Website origins allowed to submit | `wrangler.jsonc` → `vars.ALLOWED_ORIGINS` | Temporary host is included. Replace the final-domain placeholder; include the exact `https://` origin, no trailing slash; add `www` only if used |
-| Email sender | `wrangler.jsonc` → `vars.CONTACT_FROM` | `Cooper Website <projects@replace-with-sending-domain.example>`; must use your verified Resend sending domain |
-| Receiving inbox | `wrangler.jsonc` → `vars.CONTACT_TO` | `replace-with-receiving-inbox@example.com`; use one real inbox |
-| Public Turnstile site key | `wrangler.jsonc` → `vars.TURNSTILE_SITE_KEY` | `REPLACE_WITH_PUBLIC_SITE_KEY` |
+| Existing Cloudflare Worker name | `wrangler.jsonc` → `name` | `cooper-landing-page`, matching the supplied workers.dev URL; use the Cloudflare account that owns this Worker |
+| Website origins allowed to submit | `wrangler.jsonc` → `vars.ALLOWED_ORIGINS` | `https://cooper-landing-page.mailing-b99.workers.dev`; add the final website origin when connected, with `https://` and no trailing slash |
+| Email sender | `wrangler.jsonc` → `vars.CONTACT_FROM` | `Cooper Website <website@coopertechnologygroup.com>`; uses the Resend domain supplied for this setup |
+| Receiving inbox | `wrangler.jsonc` → `vars.CONTACT_TO` | `mailing@coopertechnologygroup.com`; confirmed receiving inbox for project inquiries |
+| Public Turnstile site key | `wrangler.jsonc` → `vars.TURNSTILE_SITE_KEY` | `0x4AAAAAAGDs15FptUNoLl4_`; public widget key supplied for this setup |
 | Resend API key | Cloudflare secret `RESEND_API_KEY` | Set securely; never paste into HTML, configuration committed to Git, or chat |
 | Turnstile secret | Cloudflare secret `TURNSTILE_SECRET_KEY` | Set securely; the public site key is a different value |
 | Activate the form | `wrangler.jsonc` → `vars.CONTACT_ENABLED` | Change `"false"` to `"true"` after the above values are ready |
@@ -26,7 +26,7 @@ Static HTML/CSS/JavaScript with a Cloudflare Worker for the project inquiry form
 
 The builder omits incomplete license entries from public pages. Delete entries that genuinely do not apply; do not invent numbers or describe a registration as a license. Completed entries are displayed in the footer on every page. Placeholders are reminders, **not a substitute for required advertising disclosures**. The form also rejects placeholder settings even if someone flips its enabled switch too early.
 
-Temporary website: <https://cooper.enhanzsolutions.com/>. This hostname always receives `X-Robots-Tag: noindex, nofollow`, even after production indexing is enabled. Worker preview hostnames are also excluded. Leave `productionReady: false` for any other preview hostname until launch. For separate production and preview Workers, keep separate Wrangler/site configurations so a preview rebuild cannot change live settings.
+Current temporary website: <https://cooper-landing-page.mailing-b99.workers.dev/>. Worker preview hostnames receive `X-Robots-Tag: noindex, nofollow`, even after production indexing is enabled. The earlier temporary hostname `cooper.enhanzsolutions.com` is also excluded from indexing, but is no longer in the form's allowed origins. Leave `productionReady: false` for any other preview hostname until launch. For separate production and preview Workers, keep separate Wrangler/site configurations so a preview rebuild cannot change live settings.
 
 ## Local development and checks
 
@@ -73,7 +73,7 @@ Official references: [domain verification](https://resend.com/docs/dashboard/dom
 
 ## Set up spam protection and limits
 
-1. Create a Cloudflare Turnstile managed widget. Allow `cooper.enhanzsolutions.com` for preview and the final hostname(s) when known. Keep pre-clearance disabled unless you deliberately need it.
+1. Create a Cloudflare Turnstile managed widget. Allow `cooper-landing-page.mailing-b99.workers.dev` for preview and the final hostname(s) when known. Enter hostnames without `https://`, paths or trailing slashes. Keep pre-clearance disabled unless you deliberately need it.
 2. Put its public key in `TURNSTILE_SITE_KEY`. Store its secret in Cloudflare:
 
 ```sh

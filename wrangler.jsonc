@@ -1,7 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  // Set this to the EXISTING Worker name before deploying.
-  "name": "cooper-technology-group",
+  // Existing Worker identified by its workers.dev URL.
+  "name": "cooper-landing-page",
   "main": "worker/index.mjs",
   "compatibility_date": "2026-11-13",
   "assets": {
@@ -25,10 +25,10 @@
   ],
   "vars": {
     "CONTACT_ENABLED": "false",
-    "ALLOWED_ORIGINS": "https://cooper.enhanzsolutions.com,https://replace-with-final-domain.example",
-    "CONTACT_FROM": "Cooper Website <projects@replace-with-sending-domain.example>",
-    "CONTACT_TO": "replace-with-receiving-inbox@example.com",
-    "TURNSTILE_SITE_KEY": "REPLACE_WITH_PUBLIC_SITE_KEY"
+    "ALLOWED_ORIGINS": "https://cooper-landing-page.mailing-b99.workers.dev",
+    "CONTACT_FROM": "Cooper Website <website@coopertechnologygroup.com>",
+    "CONTACT_TO": "mailing@coopertechnologygroup.com",
+    "TURNSTILE_SITE_KEY": "0x4AAAAAAGDs15FptUNoLl4_"
   },
   // Do not log request bodies, email addresses, tokens, or provider responses.
   "observability": { "enabled": false }
