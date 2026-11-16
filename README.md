@@ -13,7 +13,7 @@ Static HTML/CSS/JavaScript with a Cloudflare Worker for the project inquiry form
 | Existing Cloudflare Worker name | `wrangler.jsonc` → `name` | `cooper-landing-page`, matching the supplied workers.dev URL; use the Cloudflare account that owns this Worker |
 | Website origins allowed to submit | `wrangler.jsonc` → `vars.ALLOWED_ORIGINS` | `https://cooper-landing-page.mailing-b99.workers.dev`; add the final website origin when connected, with `https://` and no trailing slash |
 | Email sender | `wrangler.jsonc` → `vars.CONTACT_FROM` | `Cooper Website <website@coopertechnologygroup.com>`; uses the Resend domain supplied for this setup |
-| Receiving inbox | `wrangler.jsonc` → `vars.CONTACT_TO` | `mailing@coopertechnologygroup.com`; confirmed receiving inbox for project inquiries |
+| Receiving inbox | `wrangler.jsonc` → `vars.CONTACT_TO` | `info@coopertechnologygroup.com`; confirmed receiving inbox for project inquiries |
 | Public Turnstile site key | `wrangler.jsonc` → `vars.TURNSTILE_SITE_KEY` | `0x4AAAAAAGDs15FptUNoLl4_`; public widget key supplied for this setup |
 | Resend API key | Cloudflare secret `RESEND_API_KEY` | Set securely; never paste into HTML, configuration committed to Git, or chat |
 | Turnstile secret | Cloudflare secret `TURNSTILE_SECRET_KEY` | Set securely; the public site key is a different value |
