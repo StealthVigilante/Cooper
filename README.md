@@ -2,7 +2,7 @@
 
 Static HTML/CSS/JavaScript with a Cloudflare Worker for the project inquiry form. Email is delivered through Resend. This repository now includes privacy and website terms pages, form protections, a safe asset build, security headers, and local fonts/libraries.
 
-**Current state:** prepared and tested locally, not deployed by this change. The form is deliberately disabled, final-domain details are placeholders, and search indexing is disabled. Existing hosting remains unchanged until you deploy.
+**Current state:** the local form configuration is enabled for the supplied Worker, sender, receiving inbox and public Turnstile key. The two secrets must be configured in Cloudflare and the widget must allow the Worker hostname. The deployed form's public config endpoint reports whether it is ready. Final-domain details remain placeholders and search indexing is disabled.
 
 ## Fill these in later
 
@@ -17,7 +17,7 @@ Static HTML/CSS/JavaScript with a Cloudflare Worker for the project inquiry form
 | Public Turnstile site key | `wrangler.jsonc` → `vars.TURNSTILE_SITE_KEY` | `0x4AAAAAAGDs15FptUNoLl4_`; public widget key supplied for this setup |
 | Resend API key | Cloudflare secret `RESEND_API_KEY` | Set securely; never paste into HTML, configuration committed to Git, or chat |
 | Turnstile secret | Cloudflare secret `TURNSTILE_SECRET_KEY` | Set securely; the public site key is a different value |
-| Activate the form | `wrangler.jsonc` → `vars.CONTACT_ENABLED` | Change `"false"` to `"true"` after the above values are ready |
+| Activate the form | `wrangler.jsonc` → `vars.CONTACT_ENABLED` | `"true"` in the local configuration; deployment also requires the Cloudflare secrets, rate-limit bindings and Turnstile hostname setup |
 | NJ qualifying individual license | `site.config.json` → `businessLicenses` | Replace with the verified licensee's name and individual license number as required |
 | NJ burglar alarm business license | `site.config.json` → `businessLicenses` | Replace the holder/name and number with verified current details |
 | NJ fire alarm business license | Same | Replace with verified current details if advertising these services |
@@ -39,7 +39,7 @@ npm run build
 npm run dev
 ```
 
-Open the local address printed by Wrangler, normally `http://localhost:8787`. The disabled form shows a phone-contact message rather than pretending to send anything.
+Open the local address printed by Wrangler, normally `http://localhost:8787`. Without matching local secrets and an allowed local origin, the form shows a phone-contact message rather than pretending to send anything.
 
 For local email configuration, copy `.dev.vars.example` to `.dev.vars` and fill it in privately. Use a dedicated test inbox; enabling a real Resend key can send real messages. Set `ALLOWED_ORIGINS` to the exact local origin you use. Turnstile test keys work locally; a real widget must allow the real website hostname. The Worker verifies both `hostname` and `action: contact`, so local tests must use a result scoped to the local hostname. Do not weaken production verification to accommodate test keys.
 

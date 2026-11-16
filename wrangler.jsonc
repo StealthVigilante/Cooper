@@ -24,7 +24,7 @@
     }
   ],
   "vars": {
-    "CONTACT_ENABLED": "false",
+    "CONTACT_ENABLED": "true",
     "ALLOWED_ORIGINS": "https://cooper-landing-page.mailing-b99.workers.dev",
     "CONTACT_FROM": "Cooper Website <website@coopertechnologygroup.com>",
     "CONTACT_TO": "mailing@coopertechnologygroup.com",
