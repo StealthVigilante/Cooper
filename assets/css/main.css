@@ -419,33 +419,42 @@ html.is-leaving .curtain__mark { opacity: 1; transition: opacity .3s .35s; }
 }
 
 /* HOME: Residential / Commercial split */
-.split { display: flex; gap: var(--col-gap); height: clamp(34rem, 88vh, 54rem); }
+.split { display: flex; gap: var(--col-gap); height: clamp(34rem, 88vh, 54rem); container-type: inline-size; --split-ease: cubic-bezier(.22, 1, .36, 1); }
 .split__panel {
   position: relative; flex: 1 1 0; min-width: 0; overflow: hidden; color: var(--white);
-  transition: flex-grow 1s var(--ease); display: flex; flex-direction: column; justify-content: space-between;
+  display: flex; flex-direction: column; justify-content: space-between;
   padding: clamp(1.25rem, 2.4vw, 2.25rem);
 }
-.split:hover .split__panel { flex-grow: .78; }
-.split .split__panel:hover { flex-grow: 1.4; }
-.split__panel .media { position: absolute; inset: 0; z-index: 0; }
-.split__panel .media img { transition: scale 1.6s var(--ease), clip-path 1.3s var(--ease-in-out); }
-.split__panel:hover .media.is-in img { scale: 1.04; }
+/* [data-reveal] sets its own transition; include flex-grow so the resize is animated, not snapped */
+.js .split__panel, .js .split__panel[data-reveal] { transition: opacity 1s var(--ease), transform 1.1s var(--ease), flex-grow .95s var(--split-ease); }
+/* Active panel is set by JS (stays put while the pointer crosses the gap), with :hover as a no-JS fallback */
+.split[data-active] .split__panel { flex-grow: .78; }
+.split[data-active] .split__panel.is-active { flex-grow: 1.4; }
+.split:not([data-active]):hover .split__panel { flex-grow: .78; }
+.split:not([data-active]) .split__panel:hover { flex-grow: 1.4; }
+/* Fixed-size image and text column: only the visible window changes, so nothing reflows or resamples per frame */
+.split__panel .media { position: absolute; top: 0; bottom: 0; left: 50%; width: 66cqw; translate: -50% 0; z-index: 0; }
+.split__panel .media img { transition: scale 1.4s var(--split-ease), clip-path 1.3s var(--ease-in-out); will-change: scale; }
+.split__panel.is-active .media.is-in img, .split:not([data-active]) .split__panel:hover .media.is-in img { scale: 1.045; }
 .split__panel::after { content: ""; position: absolute; inset: 0; z-index: 1; background: linear-gradient(0deg, rgba(8,9,10,.7) 0%, rgba(8,9,10,.05) 55%, rgba(8,9,10,.25) 100%); }
 .split__top, .split__bottom { position: relative; z-index: 2; }
+.split__top { width: 100%; }
+@media (min-width: 900px) { .split__bottom { width: calc(35cqw - 2 * clamp(1.25rem, 2.4vw, 2.25rem)); } .split__title { white-space: nowrap; } }
 .split__top { display: flex; justify-content: space-between; gap: 1rem; }
-.split__bottom { display: grid; gap: 1.25rem; }
-.split__title { font-size: clamp(2.75rem, 6vw, 6.5rem); letter-spacing: -.05em; line-height: .9; font-weight: 500; }
+.split__bottom { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.25rem; }
+.split__title { font-size: clamp(2.75rem, 5.3vw, 6.5rem); letter-spacing: -.05em; line-height: .9; font-weight: 500; }
 .split__text { min-height: 4.6em; max-width: 27rem; font-size: var(--fs-small); color: rgba(255,255,255,.86); }
 .split__list { display: flex; flex-wrap: wrap; gap: .4rem .5rem; max-width: 32rem; }
 .split__list li { font-size: .75rem; letter-spacing: .02em; padding: .35rem .7rem; border: 1px solid rgba(255,255,255,.35); border-radius: 999px; }
 .split__go { display: inline-flex; align-items: center; gap: .6rem; font-weight: 500; font-size: .9375rem; }
 .split__go i { width: 2.75rem; height: 2.75rem; border-radius: 50%; border: 1px solid rgba(255,255,255,.5); display: grid; place-items: center; transition: background .4s var(--ease), color .4s var(--ease); }
 .split__go i svg { width: .75rem; height: .75rem; }
-.split__panel:hover .split__go i { background: var(--white); color: var(--ink); }
+.split__panel:hover .split__go i, .split__panel.is-active .split__go i { background: var(--white); color: var(--ink); }
 @media (max-width: 899px) {
   .split { flex-direction: column; height: auto; }
   .split__panel { min-height: 32rem; flex: none; }
-  .split:hover .split__panel, .split .split__panel:hover { flex-grow: 0; }
+  .split .split__panel, .split[data-active] .split__panel, .split[data-active] .split__panel.is-active { flex-grow: 0; }
+  .split__panel .media { left: 0; width: 100%; translate: none; }
 }
 
 /* HOME: Services switcher */
@@ -1104,4 +1113,13 @@ button:disabled { cursor:not-allowed; opacity:.6; }
   .hero__top .label, .rhero .label { text-shadow: 0 1px 8px rgba(0,0,0,.5); }
   .rhero__nav .chip, .rhero__nav a { background: rgba(10,11,12,.45); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
   .rhero__nav .chip:hover { background: var(--white); }
+}
+
+/* Button hover: the fill overshoots the rounded edge, and the button itself turns steel once the sweep lands,
+   so no white or ink fringe is left at the curved ends */
+.btn::after { inset: -2px; }
+.btn:hover, .btn--light:hover, .btn--line:hover, .nav .btn:hover,
+body[data-nav="dark"] .nav .btn:hover, .nav.is-scrolled .btn:hover, body.theme-night .nav.is-scrolled .btn:hover {
+  background-color: var(--steel);
+  transition: background-color .15s linear .32s, color .35s var(--ease), transform .35s var(--ease), box-shadow .35s var(--ease);
 }

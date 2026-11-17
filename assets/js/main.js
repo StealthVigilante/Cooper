@@ -523,4 +523,20 @@
       requestAnimationFrame(function () { parts.forEach(function (p) { p.style.animation = ""; }); });
     });
   }
+
+  /* Home split: keep the active panel steady while the pointer crosses the gap */
+  var split = $(".split");
+  if (split && finePointer) {
+    var panels = $$(".split__panel", split);
+    panels.forEach(function (p, i) {
+      p.addEventListener("pointerenter", function () {
+        panels.forEach(function (q) { q.classList.toggle("is-active", q === p); });
+        split.setAttribute("data-active", i);
+      });
+    });
+    split.addEventListener("pointerleave", function () {
+      split.removeAttribute("data-active");
+      panels.forEach(function (q) { q.classList.remove("is-active"); });
+    });
+  }
 })();
