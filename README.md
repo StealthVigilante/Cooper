@@ -2,16 +2,17 @@
 
 Static HTML/CSS/JavaScript with a Cloudflare Worker for the project inquiry form. Email is delivered through Resend. This repository now includes privacy and website terms pages, form protections, a safe asset build, security headers, and local fonts/libraries.
 
-**Current state:** the local form configuration is enabled for the supplied Worker, sender, receiving inbox and public Turnstile key. The two secrets must be configured in Cloudflare and the widget must allow the Worker hostname. The deployed form's public config endpoint reports whether it is ready. Final-domain details remain placeholders and search indexing is disabled.
+**Current state:** the website is configured to accept public requests only at `test.coopertechnologygroup.com`, including static files and form endpoints. The form is enabled for the supplied sender, receiving inbox and public Turnstile key. The two secrets must be configured in Cloudflare and the widget must allow `test.coopertechnologygroup.com`. The deployed form's public config endpoint reports whether it is ready. Build metadata uses the test domain and search indexing remains disabled. Business license details still need to be completed as applicable.
 
 ## Fill these in later
 
 | Detail | Where to put it | Current placeholder / action |
 | --- | --- | --- |
-| Final website domain | `site.config.json` → `productionOrigin` | `https://replace-with-final-domain.example` |
+| Canonical/build origin | `site.config.json` → `productionOrigin` | `https://test.coopertechnologygroup.com` for staging; replace with the final public origin at launch |
 | Search indexing | `site.config.json` → `productionReady` | Keep `false` while on the temporary domain; set `true` only for launch |
 | Existing Cloudflare Worker name | `wrangler.jsonc` → `name` | `cooper-landing-page`, matching the supplied workers.dev URL; use the Cloudflare account that owns this Worker |
-| Website origins allowed to submit | `wrangler.jsonc` → `vars.ALLOWED_ORIGINS` | `https://cooper-landing-page.mailing-b99.workers.dev`; add the final website origin when connected, with `https://` and no trailing slash |
+| Public website hostnames | `wrangler.jsonc` → `vars.ALLOWED_HOSTS` | `test.coopertechnologygroup.com` only; exact hostname, no scheme, path or wildcard |
+| Website origins allowed to submit | `wrangler.jsonc` → `vars.ALLOWED_ORIGINS` | `https://test.coopertechnologygroup.com`; keep synchronized with allowed public hosts, using `https://` and no trailing slash |
 | Email sender | `wrangler.jsonc` → `vars.CONTACT_FROM` | `Cooper Website <website@coopertechnologygroup.com>`; uses the Resend domain supplied for this setup |
 | Receiving inbox | `wrangler.jsonc` → `vars.CONTACT_TO` | `info@coopertechnologygroup.com`; confirmed receiving inbox for project inquiries |
 | Public Turnstile site key | `wrangler.jsonc` → `vars.TURNSTILE_SITE_KEY` | `0x4AAAAAAGDs15FptUNoLl4_`; public widget key supplied for this setup |
@@ -26,7 +27,13 @@ Static HTML/CSS/JavaScript with a Cloudflare Worker for the project inquiry form
 
 The builder omits incomplete license entries from public pages. Delete entries that genuinely do not apply; do not invent numbers or describe a registration as a license. Completed entries are displayed in the footer on every page. Placeholders are reminders, **not a substitute for required advertising disclosures**. The form also rejects placeholder settings even if someone flips its enabled switch too early.
 
-Current temporary website: <https://cooper-landing-page.mailing-b99.workers.dev/>. Worker preview hostnames receive `X-Robots-Tag: noindex, nofollow`, even after production indexing is enabled. The earlier temporary hostname `cooper.enhanzsolutions.com` is also excluded from indexing, but is no longer in the form's allowed origins. Leave `productionReady: false` for any other preview hostname until launch. For separate production and preview Workers, keep separate Wrangler/site configurations so a preview rebuild cannot change live settings.
+Current public staging website: <https://test.coopertechnologygroup.com/>. Keep the existing DNS/SaaS routing through `cooper.enhanzsolutions.com`; the Worker checks the incoming request URL hostname before serving anything. Direct requests to the agency hostname and `cooper-landing-page.mailing-b99.workers.dev` return 403, including requests for CSS, JavaScript, fonts, images and APIs. No DNS records or SaaS routes are changed by this repository configuration. Other hostnames are denied too; an absent/empty `ALLOWED_HOSTS` fails closed. Host/forwarding headers cannot replace the URL hostname used by this check.
+
+`assets.run_worker_first: true` is required: changing it to asset-first or API-only would let static files bypass the hostname check. Every request now invokes the Worker before its asset handler, so monitor Worker invocation usage. Asset cache headers remain in place. See [Cloudflare's Worker-first routing documentation](https://developers.cloudflare.com/workers/static-assets/routing/worker-script/).
+
+The test hostname always receives `X-Robots-Tag: noindex, nofollow`, even if production indexing is later enabled. Worker and earlier agency preview hostname rules remain excluded too. `productionReady: false` currently excludes the entire staging build from indexing. At launch, explicitly add any intended apex/`www` hostnames to `ALLOWED_HOSTS`, add matching HTTPS origins to `ALLOWED_ORIGINS`, configure those hostnames in Turnstile, and update `productionOrigin` before enabling production indexing. Do not add the CNAME target to the public allowlist just because it handles routing. Separate preview and production Workers should use separate configurations.
+
+Disabling the `workers.dev` route in Cloudflare is optional after confirming the custom-hostname route works; the Worker hostname guard already denies it with 403. Do not disable a route or change SaaS/DNS settings without checking how customer traffic reaches this Worker.
 
 ## Local development and checks
 
@@ -39,9 +46,9 @@ npm run build
 npm run dev
 ```
 
-Open the local address printed by Wrangler, normally `http://localhost:8787`. Without matching local secrets and an allowed local origin, the form shows a phone-contact message rather than pretending to send anything.
+Open the local address printed by Wrangler, normally `http://localhost:8787`. `npm run dev` overrides `ALLOWED_HOSTS` to allow `localhost,127.0.0.1` only for that local command; the production file still allows only the test domain. Browser tests use the same local-host override and disable live contact sending. Without matching local secrets and an allowed local origin, the form shows a phone-contact message rather than pretending to send anything.
 
-For local email configuration, copy `.dev.vars.example` to `.dev.vars` and fill it in privately. Use a dedicated test inbox; enabling a real Resend key can send real messages. Set `ALLOWED_ORIGINS` to the exact local origin you use. Turnstile test keys work locally; a real widget must allow the real website hostname. The Worker verifies both `hostname` and `action: contact`, so local tests must use a result scoped to the local hostname. Do not weaken production verification to accommodate test keys.
+For local email configuration, copy `.dev.vars.example` to `.dev.vars` and fill it in privately. Keep `ALLOWED_HOSTS=localhost,127.0.0.1` only in that local file; never copy that hostname override into production settings. Use a dedicated test inbox; enabling a real Resend key can send real messages. Set `ALLOWED_ORIGINS` to the exact local origin you use. Turnstile test keys work locally; a real widget must allow the real website hostname. The Worker verifies both `hostname` and `action: contact`, so local tests must use a result scoped to the local hostname. Do not weaken production verification to accommodate test keys.
 
 Browser checks:
 
@@ -73,7 +80,7 @@ Official references: [domain verification](https://resend.com/docs/dashboard/dom
 
 ## Set up spam protection and limits
 
-1. Create a Cloudflare Turnstile managed widget. Allow `cooper-landing-page.mailing-b99.workers.dev` for preview and the final hostname(s) when known. Enter hostnames without `https://`, paths or trailing slashes. Keep pre-clearance disabled unless you deliberately need it.
+1. In the existing Cloudflare Turnstile managed widget, add `test.coopertechnologygroup.com` as an allowed hostname before deploying this restriction. Keep the supplied public and secret keys paired with that widget. Add final hostname(s) at launch. Enter hostnames without `https://`, paths or trailing slashes. Keep pre-clearance disabled unless you deliberately need it.
 2. Put its public key in `TURNSTILE_SITE_KEY`. Store its secret in Cloudflare:
 
 ```sh
@@ -107,12 +114,14 @@ No advertising/analytics tools were found in the supplied site. A broad cookie b
 1. Set the existing Worker name and account/route/domain details. Preserve existing routes/settings that are managed outside this repository; none were supplied here. This configuration does not attach or move any domain by itself.
 2. Configure the secrets and public variables above. Set `CONTACT_ENABLED: "true"` only when real values are in place. Keep the temporary site unindexed.
 3. Run `npm run check`, then deploy the prepared Worker and its assets with `npm run deploy` when you intend to publish. For Workers Builds, use `npm ci && npm run build` as the build step and `npx wrangler deploy` as the deploy step. Do not upload the entire repository as static assets; only `dist/` is public, and the Worker is necessary for the form.
-4. On the deployed preview, verify `/api/contact/config` reports enabled, complete a real Turnstile challenge, and submit a single controlled inquiry. Confirm the success screen, Resend delivery status, inbox/spam arrival and Reply-To. Provider acceptance is not proof of inbox delivery. Check that a failed submission keeps its contents. No live email has been sent by the automated tests.
-5. Before the final-domain launch, set `productionOrigin`, replace license placeholders as applicable, check all legal/owner details, add the final Turnstile hostname and allowed origin, and attach the final custom domain in Cloudflare. Set `productionReady: true` and rebuild/deploy. If DNS is managed elsewhere, use the records Cloudflare supplies; do not guess them.
+4. On `https://test.coopertechnologygroup.com`, verify `/api/contact/config` reports enabled, complete a real Turnstile challenge, and submit a single controlled inquiry. Confirm the success screen, Resend delivery status, inbox/spam arrival and Reply-To. Provider acceptance is not proof of inbox delivery. Check that a failed submission keeps its contents. Confirm pages/assets/APIs return 403 on the agency and workers.dev hostnames, and a missing path returns the branded 404 on the test hostname. No live email has been sent by the automated tests.
+5. Before the final-domain launch, set `productionOrigin`, replace license placeholders as applicable, check all legal/owner details, add the final hostname(s) to `ALLOWED_HOSTS` and Turnstile plus their HTTPS origins to `ALLOWED_ORIGINS`, and attach the final custom domain in Cloudflare. Set `productionReady: true` and rebuild/deploy. If DNS is managed elsewhere, use the records Cloudflare supplies; do not guess them.
 6. Verify HTTP→HTTPS and preferred-host redirects at Cloudflare. Check canonical tags, social images, JSON-LD, robots/sitemap URLs and the final response headers. The source uses the old business domain as a template; **the build rewrites it to `productionOrigin` throughout metadata, schema, sitemap and robots**. Always deploy the build output.
 7. Submit the final sitemap in Google Search Console, confirm your Google Business Profile details, and measure mobile Core Web Vitals on the final deployment. The preview should remain noindex, and should not be disallowed in robots.txt in a way that prevents crawlers from seeing that header.
 
 ## Maintenance
+
+- Missing pages use `404.html` with a real 404 response, noindex headers and no caching. Its asset/navigation links are root-relative so it works at nested missing URLs. `/404.html` also returns 404 directly and is omitted from the sitemap. Unknown `/api/*` paths retain JSON 404 responses. Forbidden hostnames always get a plain 403 before any 404 rendering.
 
 - Review Cloudflare/Resend usage and delivery failures periodically. To stop online submissions quickly, set `CONTACT_ENABLED: "false"` in the active Worker configuration and redeploy if using file-managed variables; phone contact remains available.
 - Rotate any exposed secrets; keep Cloudflare, Resend and the receiving mailbox protected with MFA.

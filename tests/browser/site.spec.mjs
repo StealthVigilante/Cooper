@@ -11,12 +11,12 @@ test('all pages render with security headers, images, local fonts and legal link
   });
   for (const name of (await readdir('dist')).filter(n => n.endsWith('.html'))) {
     const response = await page.goto(name === 'index.html' ? '/' : `/${name}`);
-    expect(response.status(), name).toBe(200);
+    expect(response.status(), name).toBe(name === '404.html' ? 404 : 200);
     expect(response.headers()['content-security-policy'], name).toContain("script-src-attr 'none'");
     expect(response.headers()['x-robots-tag'], name).toContain('noindex');
     await expect(page.locator('h1'), name).toBeVisible();
-    await expect(page.locator('footer a[href="privacy.html"]')).toBeVisible();
-    await expect(page.locator('footer a[href="terms.html"]')).toBeVisible();
+    await expect(page.locator('footer a[href$="privacy.html"]')).toBeVisible();
+    await expect(page.locator('footer a[href$="terms.html"]')).toBeVisible();
     await page.evaluate(() => document.fonts.ready);
     expect(await page.evaluate(() => document.fonts.check('16px "Schibsted Grotesk"'))).toBe(true);
     expect(await page.locator('.brand use').first().evaluate(el => el.getBBox().width)).toBeGreaterThan(0);
@@ -35,6 +35,39 @@ test('private source/configuration and nonexistent pages are not served', async 
   const redirect = await request.get('/index.html', { maxRedirects: 0 });
   expect(redirect.status()).toBe(301);
   expect(redirect.headers().location).toBe('/');
+});
+
+test('blocked hostnames return 403 for pages, static files and API routes', async ({ request }) => {
+  for (const host of ['cooper.enhanzsolutions.com', 'cooper-landing-page.mailing-b99.workers.dev']) {
+    for (const path of ['/', '/contact.html', '/assets/css/main.css', '/assets/js/contact.js', '/assets/fonts/fonts.css', '/assets/img/logo-symbols.svg', '/api/contact/config', '/api/contact', '/missing/path']) {
+      const response = await request.get(path, { headers: { Host: host }, maxRedirects: 0 });
+      expect(response.status(), `${host}${path}`).toBe(403);
+      expect(await response.text()).toBe('Forbidden');
+      expect(response.headers()['cache-control']).toBe('no-store');
+    }
+  }
+});
+
+test('nested missing URLs have a branded 404 with working assets and recovery links', async ({ page, request }) => {
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
+  const response = await page.goto('/missing/nested/page');
+  expect(response.status()).toBe(404);
+  expect(response.headers()['x-robots-tag']).toContain('noindex');
+  await expect(page.getByRole('heading', { name: 'We couldn’t find that page.' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Back to home' })).toHaveAttribute('href', '/');
+  await expect(page.getByRole('link', { name: 'Contact Cooper', exact: true })).toHaveAttribute('href', '/contact.html');
+  await page.evaluate(() => document.fonts.ready);
+  expect(await page.locator('.brand use').first().evaluate(el => el.getBBox().width)).toBeGreaterThan(0);
+  expect(await page.evaluate(() => performance.getEntriesByType('resource').filter(r => r.name.includes('/missing/')).map(r => r.name))).toEqual([]);
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+  await page.screenshot({ path: '/tmp/cooper-404-mobile.png', fullPage: true });
+  await page.getByRole('link', { name: 'Back to home' }).click();
+  await expect(page).toHaveURL('http://127.0.0.1:8787/');
+  expect((await request.head('/missing/nested/page')).status()).toBe(404);
+  expect((await request.get('/api/not-a-route')).headers()['content-type']).toContain('application/json');
+  expect(errors).toEqual([]);
 });
 
 test('unconfigured form clearly offers phone contact and cannot pretend to send', async ({ page }) => {

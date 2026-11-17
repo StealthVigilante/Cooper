@@ -9,7 +9,7 @@
     "binding": "ASSETS",
     "html_handling": "none",
     "not_found_handling": "404-page",
-    "run_worker_first": ["/api/*"]
+    "run_worker_first": true
   },
   "ratelimits": [
     {
@@ -24,6 +24,7 @@
     }
   ],
   "vars": {
+    "ALLOWED_HOSTS": "test.coopertechnologygroup.com",
     "CONTACT_ENABLED": "true",
     "ALLOWED_ORIGINS": "https://test.coopertechnologygroup.com",
     "CONTACT_FROM": "Cooper Website <website@coopertechnologygroup.com>",

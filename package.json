@@ -6,7 +6,7 @@
     "build": "node scripts/build.mjs",
     "test": "node --test --test-isolation=none tests/*.test.mjs",
     "test:browser": "playwright test",
-    "dev": "npm run build && wrangler dev",
+    "dev": "npm run build && wrangler dev --var ALLOWED_HOSTS:localhost,127.0.0.1",
     "check": "npm test && npm run build && wrangler deploy --dry-run --outdir /tmp/cooper-worker-check",
     "deploy": "npm run build && wrangler deploy"
   },

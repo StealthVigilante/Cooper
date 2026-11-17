@@ -2,11 +2,11 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import worker, { handleRequest } from '../worker/index.mjs';
 
-const origin = 'https://cooper.enhanzsolutions.com';
+const origin = 'https://test.coopertechnologygroup.com';
 function environment(overrides = {}) {
   return { CONTACT_ENABLED: 'true', RESEND_API_KEY: 'test-secret', TURNSTILE_SECRET_KEY: 'test-turnstile-secret',
     TURNSTILE_SITE_KEY: 'public-key', CONTACT_FROM: 'Website <projects@notify.cooper.test>',
-    CONTACT_TO: 'owner@cooper.test', ALLOWED_ORIGINS: origin,
+    CONTACT_TO: 'owner@cooper.test', ALLOWED_ORIGINS: origin, ALLOWED_HOSTS: 'test.coopertechnologygroup.com',
     CONTACT_RATE_LIMITER: { limit: async () => ({ success: true }) },
     CONTACT_SEND_LIMITER: { limit: async () => ({ success: true }) }, ...overrides };
 }
@@ -22,7 +22,7 @@ function provider(verify = {}, delivery = { id: 'test-id' }) {
   const calls = [];
   const fetcher = async (url, init) => {
     calls.push({ url, ...init });
-    return Response.json(url.includes('siteverify') ? { success: true, action: 'contact', hostname: 'cooper.enhanzsolutions.com', ...verify } : delivery);
+    return Response.json(url.includes('siteverify') ? { success: true, action: 'contact', hostname: 'test.coopertechnologygroup.com', ...verify } : delivery);
   };
   return { calls, fetcher };
 }
@@ -135,7 +135,7 @@ test('the shared sending limiter blocks delivery after a valid challenge', async
 });
 test('Resend failures never produce success or expose provider errors', async () => {
   const response = await handleRequest(request(), environment(), async url => url.includes('siteverify')
-    ? Response.json({ success: true, hostname: 'cooper.enhanzsolutions.com', action: 'contact' })
+    ? Response.json({ success: true, hostname: 'test.coopertechnologygroup.com', action: 'contact' })
     : Response.json({ error: 'secret upstream error' }, { status: 403 }));
   assert.equal(response.status, 502); assert.doesNotMatch(await response.text(), /secret upstream error/);
 });

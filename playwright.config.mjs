@@ -13,7 +13,7 @@ export default defineConfig({
       : {}
   },
   webServer: {
-    command: 'npm run build && npx wrangler dev --local --ip 127.0.0.1 --port 8787',
+    command: 'npm run build && npx wrangler dev --local --ip 127.0.0.1 --port 8787 --var ALLOWED_HOSTS:localhost,127.0.0.1 --var CONTACT_ENABLED:false',
     url: 'http://127.0.0.1:8787',
     reuseExistingServer: !process.env.CI,
     timeout: 60000,

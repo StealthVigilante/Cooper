@@ -21,6 +21,10 @@ function origins(env) {
   return (env.ALLOWED_ORIGINS || '').split(',').map(s => s.trim()).filter(Boolean);
 }
 
+function allowedHost(hostname, env) {
+  return (env.ALLOWED_HOSTS || '').split(',').some(host => host.trim().toLowerCase() === hostname);
+}
+
 function enabled(env) {
   return env.CONTACT_ENABLED === 'true' && env.RESEND_API_KEY && env.TURNSTILE_SECRET_KEY &&
     env.TURNSTILE_SITE_KEY && env.CONTACT_FROM && EMAIL.test(env.CONTACT_TO || '') &&
@@ -139,6 +143,15 @@ async function contact(request, env, fetcher) {
 export async function handleRequest(request, env, fetcher = fetch) {
   const url = new URL(request.url);
   try {
+    // Check the request URL before API handling or ASSETS.fetch. A CNAME target
+    // does not grant public access, and forwarded host headers are not trusted.
+    // assets.run_worker_first must stay true so this also protects static files.
+    if (!allowedHost(url.hostname, env)) {
+      return new Response(request.method === 'HEAD' ? null : 'Forbidden', {
+        status: 403,
+        headers: { ...securityHeaders, 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex' }
+      });
+    }
     if (url.pathname === '/api/contact/config') {
       if (request.method !== 'GET') return json(405, { error: 'Method not allowed.' }, { Allow: 'GET' });
       const available = Boolean(enabled(env) && origins(env).includes(url.origin));
@@ -146,7 +159,14 @@ export async function handleRequest(request, env, fetcher = fetch) {
     }
     if (url.pathname === '/api/contact') return await contact(request, env, fetcher);
     if (url.pathname.startsWith('/api/')) return json(404, { error: 'Not found.' });
-    return await env.ASSETS.fetch(request);
+    const asset = await env.ASSETS.fetch(request);
+    if (asset.status === 404 || url.pathname === '/404.html') {
+      const headers = new Headers(asset.headers);
+      headers.set('X-Robots-Tag', 'noindex');
+      headers.set('Cache-Control', 'no-store');
+      return new Response(asset.body, { status: 404, statusText: 'Not Found', headers });
+    }
+    return asset;
   } catch (error) {
     if (error instanceof HttpError) return json(error.status, { error: error.message });
     // Never expose or log submitted content, secrets, or upstream response bodies.

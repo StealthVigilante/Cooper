@@ -26,7 +26,7 @@ for (const name of [...files, 'robots.txt', 'sitemap.xml']) {
 // Static asset headers do not apply to Worker-generated API responses; the
 // Worker attaches the same security headers itself.
 const common = Object.entries(securityHeaders).map(([key, value]) => `  ${key}: ${value}`).join('\n') + (config.productionReady ? '' : '\n  X-Robots-Tag: noindex, nofollow');
-const headers = `/*\n${common}\n\n/assets/css/*\n  Cache-Control: public, max-age=86400\n\n/assets/js/*\n  Cache-Control: public, max-age=86400\n\n/assets/img/*\n  Cache-Control: public, max-age=86400\n\n/assets/fonts/*\n  Cache-Control: public, max-age=31536000, immutable\n\n/assets/vendor/*\n  Cache-Control: public, max-age=31536000, immutable\n\nhttps://cooper.enhanzsolutions.com/*\n  X-Robots-Tag: noindex, nofollow\n\nhttps://:worker.:account.workers.dev/*\n  X-Robots-Tag: noindex, nofollow\n`;
+const headers = `/*\n${common}\n\n/assets/css/*\n  Cache-Control: public, max-age=86400\n\n/assets/js/*\n  Cache-Control: public, max-age=86400\n\n/assets/img/*\n  Cache-Control: public, max-age=86400\n\n/assets/fonts/*\n  Cache-Control: public, max-age=31536000, immutable\n\n/assets/vendor/*\n  Cache-Control: public, max-age=31536000, immutable\n\nhttps://test.coopertechnologygroup.com/*\n  X-Robots-Tag: noindex, nofollow\n\nhttps://cooper.enhanzsolutions.com/*\n  X-Robots-Tag: noindex, nofollow\n\nhttps://:worker.:account.workers.dev/*\n  X-Robots-Tag: noindex, nofollow\n`;
 await writeFile('dist/_headers', headers);
 await writeFile('dist/_redirects', '/ /index.html 200\n/index.html / 301\n');
 console.log(`Built ${files.length} pages for ${siteURL}. Indexing: ${config.productionReady ? 'production only' : 'disabled (preview)'}. Email activation is configured separately.`);
