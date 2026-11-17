@@ -1,6 +1,6 @@
 {
-  "productionOrigin": "https://test.coopertechnologygroup.com",
-  "productionReady": false,
+  "productionOrigin": "https://coopertechnologygroup.com",
+  "productionReady": true,
   "businessLicenses": [
     { "label": "NJ Qualifying Licensee License Number", "holder": "REPLACE_WITH_LICENSE_HOLDER", "number": "REPLACE_WITH_VERIFIED_INDIVIDUAL_LICENSE_NUMBER" },
     { "label": "NJ Burglar Alarm Business License Number", "holder": "REPLACE_WITH_LICENSE_HOLDER", "number": "REPLACE_WITH_VERIFIED_NUMBER" },

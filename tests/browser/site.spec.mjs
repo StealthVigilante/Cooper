@@ -1,5 +1,7 @@
 import { test, expect } from '@playwright/test';
-import { readdir } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
+
+const site = JSON.parse(await readFile('site.config.json', 'utf8'));
 
 test('all pages render with security headers, images, local fonts and legal links', async ({ page }) => {
   const errors = [];
@@ -13,7 +15,14 @@ test('all pages render with security headers, images, local fonts and legal link
     const response = await page.goto(name === 'index.html' ? '/' : `/${name}`);
     expect(response.status(), name).toBe(name === '404.html' ? 404 : 200);
     expect(response.headers()['content-security-policy'], name).toContain("script-src-attr 'none'");
-    expect(response.headers()['x-robots-tag'], name).toContain('noindex');
+    if (name === '404.html' || !site.productionReady) {
+      expect(response.headers()['x-robots-tag'], name).toContain('noindex');
+    } else {
+      expect(response.headers()['x-robots-tag'], name).toBeUndefined();
+      const pathname = name === 'index.html' ? '/' : `/${name}`;
+      await expect(page.locator('link[rel="canonical"]'), name).toHaveAttribute('href', site.productionOrigin + pathname);
+      await expect(page.locator('meta[property="og:url"]'), name).toHaveAttribute('content', site.productionOrigin + pathname);
+    }
     await expect(page.locator('h1'), name).toBeVisible();
     await expect(page.locator('footer a[href$="privacy.html"]')).toBeVisible();
     await expect(page.locator('footer a[href$="terms.html"]')).toBeVisible();
@@ -38,7 +47,7 @@ test('private source/configuration and nonexistent pages are not served', async 
 });
 
 test('blocked hostnames return 403 for pages, static files and API routes', async ({ request }) => {
-  for (const host of ['cooper.enhanzsolutions.com', 'cooper-landing-page.mailing-b99.workers.dev']) {
+  for (const host of ['test.coopertechnologygroup.com', 'cooper.enhanzsolutions.com', 'cooper-landing-page.mailing-b99.workers.dev']) {
     for (const path of ['/', '/contact.html', '/assets/css/main.css', '/assets/js/contact.js', '/assets/fonts/fonts.css', '/assets/img/logo-symbols.svg', '/api/contact/config', '/api/contact', '/missing/path']) {
       const response = await request.get(path, { headers: { Host: host }, maxRedirects: 0 });
       expect(response.status(), `${host}${path}`).toBe(403);

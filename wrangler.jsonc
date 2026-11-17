@@ -24,12 +24,12 @@
     }
   ],
   "vars": {
-    "ALLOWED_HOSTS": "test.coopertechnologygroup.com",
+    "ALLOWED_HOSTS": "test.coopertechnologygroup.com, coopertechnologygroup.com, www.coopertechnologygroup.com",
     "CONTACT_ENABLED": "true",
-    "ALLOWED_ORIGINS": "https://test.coopertechnologygroup.com",
+    "ALLOWED_ORIGINS": "https://test.coopertechnologygroup.com, https://coopertechnologygroup.com, https://www.coopertechnologygroup.com",
     "CONTACT_FROM": "Cooper Website <website@coopertechnologygroup.com>",
     "CONTACT_TO": "info@coopertechnologygroup.com",
-    "TURNSTILE_SITE_KEY": "0x4AAAAAAGDs15FptUNoLl4_"
+    "TURNSTILE_SITE_KEY": "0x4AAAAAAGELWATixZ9SfAaB"
   },
   // Do not log request bodies, email addresses, tokens, or provider responses.
   "observability": { "enabled": false }

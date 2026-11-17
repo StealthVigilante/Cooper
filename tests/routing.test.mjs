@@ -3,9 +3,9 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { handleRequest } from '../worker/index.mjs';
 
-const hostname = 'test.coopertechnologygroup.com';
+const hostname = 'coopertechnologygroup.com';
 const origin = `https://${hostname}`;
-const forbiddenHosts = ['cooper.enhanzsolutions.com', 'cooper-landing-page.mailing-b99.workers.dev', 'coopertechnologygroup.com', 'www.coopertechnologygroup.com', 'evil.test', 'test.coopertechnologygroup.com.evil.test'];
+const forbiddenHosts = ['cooper.enhanzsolutions.com', 'cooper-landing-page.mailing-b99.workers.dev', 'test.coopertechnologygroup.com', 'www.coopertechnologygroup.com', 'evil.test', 'coopertechnologygroup.com.evil.test'];
 const paths = ['/', '/contact.html', '/index.html', '/404.html', '/assets/css/main.css', '/assets/js/main.js', '/assets/fonts/fonts.css', '/assets/img/logo-symbols.svg', '/robots.txt', '/sitemap.xml', '/api/contact/config', '/api/contact', '/missing/nested/page'];
 
 function env(overrides = {}) {
@@ -61,8 +61,8 @@ test('allowed pages and assets keep their original request and cache/security he
 });
 
 test('the hostname allowlist matches exact names and permits explicitly configured future hosts', async () => {
-  const configured = env({ ALLOWED_HOSTS: ` ${hostname.toUpperCase()}, coopertechnologygroup.com ` });
-  const response = await handleRequest(new Request('https://coopertechnologygroup.com/api/contact/config'), configured, neverFetch);
+  const configured = env({ ALLOWED_HOSTS: ` ${hostname.toUpperCase()}, www.coopertechnologygroup.com ` });
+  const response = await handleRequest(new Request('https://www.coopertechnologygroup.com/api/contact/config'), configured, neverFetch);
   assert.equal(response.status, 200);
   assert.deepEqual(await response.json(), { enabled: false, siteKey: null });
   assert.equal((await handleRequest(new Request(`https://${hostname}./`), configured, neverFetch)).status, 403);
@@ -95,6 +95,9 @@ test('production routing sends every request through the hostname guard', () => 
   assert.equal(config.assets.not_found_handling, '404-page');
   assert.equal(config.vars.ALLOWED_HOSTS, hostname);
   assert.equal(config.vars.ALLOWED_ORIGINS, origin);
+  const site = JSON.parse(readFileSync('site.config.json', 'utf8'));
+  assert.equal(site.productionOrigin, origin);
+  assert.equal(site.productionReady, true);
   const sitemap = readFileSync('sitemap.xml', 'utf8');
   assert.doesNotMatch(sitemap, /404\.html/);
 });
