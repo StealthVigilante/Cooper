@@ -1123,3 +1123,22 @@ body[data-nav="dark"] .nav .btn:hover, .nav.is-scrolled .btn:hover, body.theme-n
   background-color: var(--steel);
   transition: background-color .15s linear .32s, color .35s var(--ease), transform .35s var(--ease), box-shadow .35s var(--ease);
 }
+
+/* Footer: licence line and "Powered by Enhanz Solutions" credit */
+.footer__bottom { align-items: center; }
+.footer__legal { display: grid; gap: .25rem; min-width: 0; }
+.footer__legal .footer__licenses { padding-bottom: 0; display: grid; gap: .25rem; }
+.footer__license { color: var(--white); opacity: .72; letter-spacing: .01em; }
+.footer__end { display: flex; align-items: center; gap: 1rem 2rem; flex-wrap: wrap; }
+.footer__credit { display: inline-flex; align-items: center; gap: .55rem; color: var(--night-mute); transition: color .35s var(--ease); }
+.footer__credit b { font-weight: 500; color: var(--white); }
+.footer__credit-mark { width: 2.1rem; height: 1rem; flex: none; color: var(--white); transition: color .35s var(--ease), transform .5s var(--ease); }
+.footer__credit:hover { color: var(--white); }
+.footer__credit:hover .footer__credit-mark { color: #d4ff3a; transform: rotate(-8deg); }
+@media (max-width: 760px) { .footer__bottom { flex-direction: column; align-items: flex-start; } }
+
+/* Home split: photos dimmed over near-black so the white type reads. Tested at 100/70/60/50%; 60% chosen.
+   Change --split-img-opacity to adjust. */
+.split { --split-img-opacity: .6; }
+.split__panel, .split__panel .media { background: #0a0b0c; }
+.split__panel .media img { opacity: var(--split-img-opacity); }

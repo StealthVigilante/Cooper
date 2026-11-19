@@ -16,7 +16,7 @@ if (parsed.protocol !== 'https:' || parsed.pathname !== '/' || parsed.search || 
 if (config.productionReady && parsed.hostname.endsWith('.example')) throw new Error('Replace the final-domain placeholder before enabling production indexing.');
 const escape = value => String(value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const licenses = config.businessLicenses.filter(l => l.number && l.holder && !/REPLACE_WITH/.test(l.number + l.holder));
-const licenseHTML = licenses.length ? `<div class="footer__licenses small">${licenses.map(l => `<p>${escape(l.label)}: ${escape(l.number)} · ${escape(l.holder)}</p>`).join('')}</div>` : '';
+const licenseHTML = licenses.length ? `<div class="footer__licenses small">${licenses.map(l => `<p class="footer__license">${escape(l.label)} #&nbsp;${escape(l.number)} · ${escape(l.holder)}</p>`).join('')}</div>` : '';
 for (const name of [...files, 'robots.txt', 'sitemap.xml']) {
   let content = (await readFile(name, 'utf8')).replaceAll('https://coopertechnologygroup.com', siteURL);
   content = content.replace('<!-- BUSINESS_LICENSES -->', licenseHTML);
